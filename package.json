@@ -1,0 +1,23 @@
+{
+  "name": "firstgame_js",
+  "version": "1.0.0",
+  "description": "My first JS 2D Game",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BabyLizzy-FunTime-Lab/FirstGame_JS.git"
+  },
+  "author": "J.L. Rasmussen Garcia",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/BabyLizzy-FunTime-Lab/FirstGame_JS/issues"
+  },
+  "homepage": "https://github.com/BabyLizzy-FunTime-Lab/FirstGame_JS#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "express-fileupload": "^1.2.1"
+  }
+}
