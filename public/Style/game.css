@@ -1,0 +1,11 @@
+#game__canvas {
+	/*background-color: lightblue;*/
+	border: solid 2px blue;
+	margin: auto;
+	width: 800px;
+	height: 600px;
+	image-rendering: -moz-crisp-edges;
+  	image-rendering: -webkit-crisp-edges;
+  	image-rendering: pixelated;
+  	image-rendering: crisp-edges;
+}
