@@ -1,4 +1,4 @@
-// Global variable
+// Global variable, CONSTANTEN
 let canvas = document.createElement("canvas");
 let ctx = canvas.getContext("2d");
 let ninja_sprite = new Image();
@@ -12,8 +12,17 @@ function elementID(ID) {
 	return document.getElementById(ID);
 }
 
-// Global settings
+// Global settings, INSTELLINGEN
 ctx.imageSmoothingEnabled = false;
+
+// HOOFD-LUS
+
+// SPELER-HANDELINGEN
+
+// UPDATEN
+
+//TEKENEN
+
 
 // Render Game Character
 function render_squareMan() {
@@ -32,7 +41,7 @@ function render_ninja() {
 function ninja_loop() {
 	ctx.clearRect(0, 0, 800, 600);
 
-	if (x >= 20 && x != 200) {
+	if (x != 200) {
 		ctx.drawImage(ninja_sprite, x, y, 50, 40);
 		x++;
 		window.requestAnimationFrame(ninja_loop); 
@@ -50,7 +59,6 @@ function start_screen() {
 	render_ninja();
 	elementID("game--container").appendChild(canvas);
 }
-
 
 
 // Start Game
