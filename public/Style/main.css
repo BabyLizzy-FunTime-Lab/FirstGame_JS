@@ -1,10 +1,10 @@
 ::root {
 	--kleur-snow: rgb(255,250,250);
-	/*--background-one: url("../Image/brain.gif");*/
-	/*0788200034*/
+	--background-gamewin: url(../Images/Lizzy_Art.jpg);
 }
 body {
 	background-color: var(--kleur-snow);
+	min-width: 835px;
 }
 footer {
 	height: 7em;
@@ -18,15 +18,16 @@ nav {
 	text-align: center;
 	background-color: olive;
 	padding: .4em 0 .4em 0;
-	height: 3em; 
+	height: 3em;
+	width: 100%; 
 }
 nav h3 {
 	margin: 0;
 }
 #pageheader {
 	text-align: center;
-	width: 80%;
-	max-width: 40em;
+	width: 800px;
+	/*max-width: 60em;*/
 	margin: 0 auto 1em auto;
 	font-family: "Press Start 2P", "sans-serif";
 }
@@ -37,15 +38,32 @@ article {
 	margin: 0 auto 1em auto;
 }
 #main--contentbox {
-	width: 80%;
-	max-width: 60em;
-	min-height: calc(100vh - 3em);
+	width: 800px;
+	/*max-width: 60em;*/
+	min-height: 100vh;
+	padding: 0 .5em 0 .5em;
 	margin: auto;
+	box-sizing: border-box;
+}
+#game--article {
+	display: flex;
+	flex-flow: column;
+	justify-content: center;
 }
 #game--container {
-	padding: 1em 0 1em 0;
+	padding: 1em 1em 1em 1em;
+	margin: .5em auto .5em auto;
+	/*box-sizing: border-box;*/
+	height: 600px;
+	width: 800px;
+	background-image: url(../Images/Lizzy_Art.jpg);
+	background-position: center;
+	background-size: inherit;
+	background-repeat: no-repeat;
+	align-self: center;
 }
 #start_btn {
 	font-family: "Press Start 2P", "sans-serif";
 	padding: .4em;
+	align-self: center;
 }
