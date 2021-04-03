@@ -9,6 +9,9 @@ let CANVAS_HOOGTE = 600;
 let NANONAUT_BREEDTE = 181;
 let NANONAUT_HOOGTE = 229;
 let GROND_Y = 540;
+let NANONAUT_Y_VERSNELLING = 1;
+let SPATIEBALK_CODE = 32;
+let NANONAUT_SPRONG_SNELHEID = 20;
 
 // Sprites, Backgrounds & Images
 let ninja_sprite = new Image();
@@ -28,10 +31,16 @@ elementID("game--container").appendChild(canvas);
 
 let nanonautX = 50;
 let nanonautY = 40;
+let nanonautYSnelheid = 0;
+let spatiebalkIsIngedrukt = false;
 
 function start() {
 	window.requestAnimationFrame(hoofdLus);
 }
+
+window.addEventListener('keydown', onKeyDown);
+window.addEventListener('keydup', onKeyUp);
+
 
 elementID("start_btn").addEventListener("click", function(event) {
 	event.preventDefault();
@@ -46,15 +55,29 @@ function hoofdLus() {
 }
 
 // SPELER-HANDELINGEN
-
-
+function onKeyDown(event) {
+	if (event.keyCode == SPATIEBALK_CODE) {
+		spatiebalkIsIngedrukt = true;
+	}
+}
+function onKeyUp(event) {
+	if (event.keyCode == SPATIEBALK_CODE) {
+		spatiebalkIsIngedrukt == false;
+	}
+}
 
 // UPDATEN
 function update() {
+	nanonautY = nanonautY + nanonautYSnelheid;
+	nanonautYSnelheid = nanonautYSnelheid + NANONAUT_Y_VERSNELLING;
 	// update de nanonaut
-	nanonautY++;
+	// nanonautY++;
 	if (nanonautY > (GROND_Y - NANONAUT_HOOGTE)) {
 		nanonautY = GROND_Y - NANONAUT_HOOGTE;
+		nanonautYSnelheid = 0;
+	}
+	if (spatiebalkIsIngedrukt) {
+		nanonautYSnelheid = -NANONAUT_SPRONG_SNELHEID;
 	}	
 }
 
