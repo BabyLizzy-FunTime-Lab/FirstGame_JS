@@ -10,8 +10,9 @@ let NANONAUT_BREEDTE = 181;
 let NANONAUT_HOOGTE = 229;
 let GROND_Y = 540;
 let NANONAUT_Y_VERSNELLING = 1;
-let SPATIEBALK_CODE = 32;
-let NANONAUT_SPRONG_SNELHEID = 20;
+let SPATIEBALK_CODE = "Space";
+let NANONAUT_SPRONG_SNELHEID = -20;
+
 
 // Sprites, Backgrounds & Images
 let ninja_sprite = new Image();
@@ -33,14 +34,11 @@ let nanonautX = 50;
 let nanonautY = 40;
 let nanonautYSnelheid = 0;
 let spatiebalkIsIngedrukt = false;
+let nanonautIsInDeLucht = false;
 
 function start() {
 	window.requestAnimationFrame(hoofdLus);
 }
-
-window.addEventListener('keydown', onKeyDown);
-window.addEventListener('keydup', onKeyUp);
-
 
 elementID("start_btn").addEventListener("click", function(event) {
 	event.preventDefault();
@@ -55,29 +53,36 @@ function hoofdLus() {
 }
 
 // SPELER-HANDELINGEN
-function onKeyDown(event) {
-	if (event.keyCode == SPATIEBALK_CODE) {
+document.body.onkeydown = function(event) {
+	if (event.code === SPATIEBALK_CODE) {
 		spatiebalkIsIngedrukt = true;
+		console.log("nanonautYSnelheid down =" + nanonautYSnelheid);
+		console.log("nanonautY down =" + nanonautY)
 	}
 }
-function onKeyUp(event) {
-	if (event.keyCode == SPATIEBALK_CODE) {
-		spatiebalkIsIngedrukt == false;
+document.body.onkeyup = function(event) {
+	if (event.code === SPATIEBALK_CODE) {
+		spatiebalkIsIngedrukt = false;
+		console.log("nanonautYSnelheid up =" + nanonautYSnelheid);
+		console.log("nanonautY up =" + nanonautY)
 	}
 }
 
 // UPDATEN
 function update() {
+	// Gravity
 	nanonautY = nanonautY + nanonautYSnelheid;
 	nanonautYSnelheid = nanonautYSnelheid + NANONAUT_Y_VERSNELLING;
-	// update de nanonaut
-	// nanonautY++;
+	// Jump
+	if (spatiebalkIsIngedrukt && !nanonautIsInDeLucht) {
+		nanonautYSnelheid = NANONAUT_SPRONG_SNELHEID;
+		nanonautIsInDeLucht = true;
+	}
+	// Ground bottom
 	if (nanonautY > (GROND_Y - NANONAUT_HOOGTE)) {
 		nanonautY = GROND_Y - NANONAUT_HOOGTE;
 		nanonautYSnelheid = 0;
-	}
-	if (spatiebalkIsIngedrukt) {
-		nanonautYSnelheid = -NANONAUT_SPRONG_SNELHEID;
+		nanonautIsInDeLucht = false;
 	}	
 }
 
