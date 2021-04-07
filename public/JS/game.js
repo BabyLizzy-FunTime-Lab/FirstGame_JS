@@ -2,6 +2,12 @@
 function elementID(ID) {
 	return document.getElementById(ID);
 }
+// Sprites, Backgrounds & Images
+let ninja_sprite = new Image();
+	ninja_sprite.src = "Images/nanonauten/nanonaut.png";
+
+let achtergrondAfbeelding = new Image();
+	achtergrondAfbeelding.src = "Images/nanonauten/achtergrond.png";
 
 // CONSTANTEN
 let CANVAS_BREEDTE = 800;
@@ -10,17 +16,9 @@ let NANONAUT_BREEDTE = 181;
 let NANONAUT_HOOGTE = 229;
 let GROND_Y = 540;
 let NANONAUT_Y_VERSNELLING = 1;
-let SPATIEBALK_CODE = "Space";
+let SPATIEBALK_CODE = "KeyH";
 let NANONAUT_SPRONG_SNELHEID = -20;
-
-
-// Sprites, Backgrounds & Images
-let ninja_sprite = new Image();
-	ninja_sprite.src = "Images/nanonauten/nanonaut.png";
-
-let achtergrondAfbeelding = new Image();
-	achtergrondAfbeelding.src = "Images/nanonauten/achtergrond.png"
-
+let NANONAUT_X_SNELHEID = 5;
 
 // INSTELLINGEN
 let canvas = document.createElement("canvas");
@@ -29,12 +27,13 @@ canvas.width = CANVAS_BREEDTE;
 canvas.height = CANVAS_HOOGTE;
 canvas.id = "game__canvas";
 elementID("game--container").appendChild(canvas);
-
 let nanonautX = 50;
-let nanonautY = 40;
+let nanonautY = GROND_Y - NANONAUT_HOOGTE;
 let nanonautYSnelheid = 0;
 let spatiebalkIsIngedrukt = false;
 let nanonautIsInDeLucht = false;
+let cameraX = 0;
+let cameraY = 0;
 
 function start() {
 	window.requestAnimationFrame(hoofdLus);
@@ -70,42 +69,42 @@ document.body.onkeyup = function(event) {
 
 // UPDATEN
 function update() {
-	// Gravity
-	nanonautY = nanonautY + nanonautYSnelheid;
-	nanonautYSnelheid = nanonautYSnelheid + NANONAUT_Y_VERSNELLING;
+	// Run
+	nanonautX = nanonautX + NANONAUT_X_SNELHEID;
 	// Jump
 	if (spatiebalkIsIngedrukt && !nanonautIsInDeLucht) {
-		nanonautYSnelheid = NANONAUT_SPRONG_SNELHEID;
-		nanonautIsInDeLucht = true;
+        nanonautYSnelheid = NANONAUT_SPRONG_SNELHEID;
+        nanonautIsInDeLucht = true;
 	}
-	// Ground bottom
-	if (nanonautY > (GROND_Y - NANONAUT_HOOGTE)) {
-		nanonautY = GROND_Y - NANONAUT_HOOGTE;
-		nanonautYSnelheid = 0;
-		nanonautIsInDeLucht = false;
-	}	
+	// Gravity
+    nanonautY = nanonautY + nanonautYSnelheid;
+    nanonautYSnelheid = nanonautYSnelheid + NANONAUT_Y_VERSNELLING;
+    // Bottom
+    if (nanonautY > (GROND_Y - NANONAUT_HOOGTE)) {
+        nanonautY = GROND_Y - NANONAUT_HOOGTE;
+        nanonautYSnelheid = 0;
+        nanonautIsInDeLucht = false;
+    }
+    // Update camera
+    cameraX = nanonautX - 100;	
 }
 
 
 //TEKENEN
 function draw() {
-	// ctx.clearRect(0, 0, CANVAS_BREEDTE, CANVAS_HOOGTE);
-
-	
-
 	// Teken de lucht
 	ctx.fillStyle = "LightSkyBlue";
 	ctx.fillRect(0, 0, CANVAS_BREEDTE, GROND_Y - 40);
 
-	// Teken de achtergrond
-	ctx.drawImage(achtergrondAfbeelding, 0, -210);
+	// Teken de bewegend achtergrond
+	ctx.drawImage(achtergrondAfbeelding, 0 - cameraX, -210);
 
 	// Teken de grond
 	ctx.fillStyle = "ForestGreen";
 	ctx.fillRect(0, GROND_Y - 40, CANVAS_BREEDTE, CANVAS_HOOGTE - GROND_Y + 40);
 
-	// Teken de Nanonaut
-	ctx.drawImage(ninja_sprite, nanonautX, nanonautY);
+	// Teken de Nanonaut in viewport
+	ctx.drawImage(ninja_sprite, nanonautX - cameraX, nanonautY - cameraY);
 }
 
 
