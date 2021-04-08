@@ -4,7 +4,7 @@ function elementID(ID) {
 }
 // Sprites, Backgrounds & Images
 let ninja_sprite = new Image();
-	ninja_sprite.src = "Images/nanonauten/nanonaut.png";
+	ninja_sprite.src = "Images/nanonauten/geanimeerdeNanonaut.png";
 
 let achtergrondAfbeelding = new Image();
 	achtergrondAfbeelding.src = "Images/nanonauten/achtergrond.png";
@@ -19,6 +19,10 @@ let NANONAUT_Y_VERSNELLING = 1;
 let SPATIEBALK_CODE = "KeyH";
 let NANONAUT_SPRONG_SNELHEID = -20;
 let NANONAUT_X_SNELHEID = 5;
+let ACHTERGROND_BREEDTE = 1000;
+let NANONAUT_NR_FRAMES_PER_RIJ = 5;
+let NANONAUT_NR_ANIMATIEFRAMES = 7;
+
 
 // INSTELLINGEN
 let canvas = document.createElement("canvas");
@@ -27,13 +31,14 @@ canvas.width = CANVAS_BREEDTE;
 canvas.height = CANVAS_HOOGTE;
 canvas.id = "game__canvas";
 elementID("game--container").appendChild(canvas);
-let nanonautX = 50;
+let nanonautX = 70;
 let nanonautY = GROND_Y - NANONAUT_HOOGTE;
 let nanonautYSnelheid = 0;
 let spatiebalkIsIngedrukt = false;
 let nanonautIsInDeLucht = false;
 let cameraX = 0;
 let cameraY = 0;
+let nanonautFrameNr = 0;
 
 function start() {
 	window.requestAnimationFrame(hoofdLus);
@@ -85,8 +90,13 @@ function update() {
         nanonautYSnelheid = 0;
         nanonautIsInDeLucht = false;
     }
+    // Update animatie
+    nanonautFrameNr = nanonautFrameNr + 1;
+    if (nanonautFrameNr >= NANONAUT_NR_ANIMATIEFRAMES) {
+    	nanonautFrameNr = 0;
+    }
     // Update camera
-    cameraX = nanonautX - 100;	
+    cameraX = nanonautX - 70;
 }
 
 
@@ -97,14 +107,27 @@ function draw() {
 	ctx.fillRect(0, 0, CANVAS_BREEDTE, GROND_Y - 40);
 
 	// Teken de bewegend achtergrond
-	ctx.drawImage(achtergrondAfbeelding, 0 - cameraX, -210);
+	// achtergrondX is negative so it scrolls to the left and not to the right.
+	let achtergrondX = -(cameraX % ACHTERGROND_BREEDTE);
+	ctx.drawImage(achtergrondAfbeelding, achtergrondX, -210);
+	ctx.drawImage(achtergrondAfbeelding, achtergrondX + ACHTERGROND_BREEDTE, -210);
+	// Modus doesn't allow achtergrondX to go beonde 1000 and loops back to 0. The second draw glues
+	// a new background to the end of the first one.
 
 	// Teken de grond
 	ctx.fillStyle = "ForestGreen";
 	ctx.fillRect(0, GROND_Y - 40, CANVAS_BREEDTE, CANVAS_HOOGTE - GROND_Y + 40);
 
 	// Teken de Nanonaut in viewport
-	ctx.drawImage(ninja_sprite, nanonautX - cameraX, nanonautY - cameraY);
+	// ctx.drawImage(ninja_sprite, nanonautX - cameraX, nanonautY - cameraY);
+	let nanonautSpriteSheetRij = Math.floor(nanonautFrameNr/NANONAUT_NR_FRAMES_PER_RIJ);
+	let nannonautSpriteSheetKolom = nanonautFrameNr % NANONAUT_NR_FRAMES_PER_RIJ;
+	let nannonautSpriteSheetX = nannonautSpriteSheetKolom * NANONAUT_BREEDTE;
+	let nannonautSpriteSheetY = nanonautSpriteSheetRij * NANONAUT_HOOGTE;
+	ctx.drawImage(ninja_sprite, nannonautSpriteSheetX, nannonautSpriteSheetY, 
+		NANONAUT_BREEDTE, NANONAUT_HOOGTE, nanonautX - cameraX, nanonautY - cameraY, 
+		NANONAUT_BREEDTE, NANONAUT_HOOGTE);
+	console.log(nanonautSpriteSheetRij + " " + nannonautSpriteSheetKolom);
 }
 
 
