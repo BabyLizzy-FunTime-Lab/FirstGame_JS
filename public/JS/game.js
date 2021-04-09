@@ -5,9 +5,12 @@ function elementID(ID) {
 // Sprites, Backgrounds & Images
 let ninja_sprite = new Image();
 	ninja_sprite.src = "Images/nanonauten/geanimeerdeNanonaut.png";
-
 let achtergrondAfbeelding = new Image();
 	achtergrondAfbeelding.src = "Images/nanonauten/achtergrond.png";
+let bosje_1_Afbeelding = new Image();
+	bosje_1_Afbeelding.src = "Images/nanonauten/bosje1.png";
+let bosje_2_Afbeelding = new Image();
+	bosje_2_Afbeelding.src = "Images/nanonauten/bosje2.png";
 
 // CONSTANTEN
 let CANVAS_BREEDTE = 800;
@@ -16,12 +19,12 @@ let NANONAUT_BREEDTE = 181;
 let NANONAUT_HOOGTE = 229;
 let GROND_Y = 540;
 let NANONAUT_Y_VERSNELLING = 1;
-let SPATIEBALK_CODE = "KeyH";
+let JUMP_CODE = "KeyJ";
 let NANONAUT_SPRONG_SNELHEID = -20;
 let NANONAUT_X_SNELHEID = 5;
 let ACHTERGROND_BREEDTE = 1000;
-let NANONAUT_NR_FRAMES_PER_RIJ = 5;
 let NANONAUT_NR_ANIMATIEFRAMES = 7;
+let NANONAUT_ANIMATIESNELHEID = 3;
 
 
 // INSTELLINGEN
@@ -34,20 +37,25 @@ elementID("game--container").appendChild(canvas);
 let nanonautX = 70;
 let nanonautY = GROND_Y - NANONAUT_HOOGTE;
 let nanonautYSnelheid = 0;
-let spatiebalkIsIngedrukt = false;
+let jump = false;
 let nanonautIsInDeLucht = false;
 let cameraX = 0;
 let cameraY = 0;
 let nanonautFrameNr = 0;
+let spelFrameTeller = 0;
+let bosjesData = genereerBosjes();
 
+let nannonautSpriteSheet = {
+	nrFramesPerRij: 5,
+	spriteWidth: NANONAUT_BREEDTE,
+	spriteHeight: NANONAUT_HOOGTE,
+	image: ninja_sprite
+};
+
+// Start Game
 function start() {
 	window.requestAnimationFrame(hoofdLus);
 }
-
-elementID("start_btn").addEventListener("click", function(event) {
-	event.preventDefault();
-	start();
-})
 
 // HOOFD-LUS
 function hoofdLus() {
@@ -56,28 +64,46 @@ function hoofdLus() {
 	window.requestAnimationFrame(hoofdLus);
 }
 
+function genereerBosjes() {
+	let genereerBosjesData = [];
+	let bosjeX = 0;
+	let bosjeAfbeelding;
+	while (bosjeX < (2 * CANVAS_BREEDTE)) {
+		if (Math.random() >= 0.5) {
+			bosjeAfbeelding = bosje_1_Afbeelding;
+		} else {
+			bosjeAfbeelding = bosje_2_Afbeelding;
+		}
+		genereerBosjesData.push({
+			x: bosjeX,
+			y: 80 + (Math.random() * 20),
+			image: bosjeAfbeelding
+		});
+		bosjeX += 150 + (Math.random() * 200);
+	}
+	return genereerBosjesData;
+}
+
 // SPELER-HANDELINGEN
 document.body.onkeydown = function(event) {
-	if (event.code === SPATIEBALK_CODE) {
-		spatiebalkIsIngedrukt = true;
-		console.log("nanonautYSnelheid down =" + nanonautYSnelheid);
-		console.log("nanonautY down =" + nanonautY)
+	if (event.code === JUMP_CODE) {
+		jump = true;
 	}
 }
 document.body.onkeyup = function(event) {
-	if (event.code === SPATIEBALK_CODE) {
-		spatiebalkIsIngedrukt = false;
-		console.log("nanonautYSnelheid up =" + nanonautYSnelheid);
-		console.log("nanonautY up =" + nanonautY)
+	if (event.code === JUMP_CODE) {
+		jump = false;
 	}
 }
 
 // UPDATEN
 function update() {
+	// Framecounter
+	spelFrameTeller++;
 	// Run
 	nanonautX = nanonautX + NANONAUT_X_SNELHEID;
 	// Jump
-	if (spatiebalkIsIngedrukt && !nanonautIsInDeLucht) {
+	if (jump && !nanonautIsInDeLucht) {
         nanonautYSnelheid = NANONAUT_SPRONG_SNELHEID;
         nanonautIsInDeLucht = true;
 	}
@@ -90,10 +116,18 @@ function update() {
         nanonautYSnelheid = 0;
         nanonautIsInDeLucht = false;
     }
-    // Update animatie
-    nanonautFrameNr = nanonautFrameNr + 1;
-    if (nanonautFrameNr >= NANONAUT_NR_ANIMATIEFRAMES) {
-    	nanonautFrameNr = 0;
+    // Update animatie na 3 frames
+    if ((spelFrameTeller % NANONAUT_ANIMATIESNELHEID) === 0) {
+    	nanonautFrameNr = nanonautFrameNr + 1;
+    	if (nanonautFrameNr >= NANONAUT_NR_ANIMATIEFRAMES) {
+    		nanonautFrameNr = 0;
+    	}
+    }
+    // Update bosjes
+    for (var i = 0; i < bosjesData.length; i++) {
+    	if ((bosjesData[i].x - cameraX) < - CANVAS_BREEDTE) {
+    		bosjesData[i].x += (2 * CANVAS_BREEDTE) + 150;
+    	} 
     }
     // Update camera
     cameraX = nanonautX - 70;
@@ -118,19 +152,47 @@ function draw() {
 	ctx.fillStyle = "ForestGreen";
 	ctx.fillRect(0, GROND_Y - 40, CANVAS_BREEDTE, CANVAS_HOOGTE - GROND_Y + 40);
 
+	// Teken bosje
+	for (var i = 0; i < bosjesData.length; i++) {
+		ctx.drawImage(bosjesData[i].image, 
+			bosjesData[i].x - cameraX, 
+			GROND_Y - bosjesData[i].y - cameraY); 
+	}
+
 	// Teken de Nanonaut in viewport
 	// ctx.drawImage(ninja_sprite, nanonautX - cameraX, nanonautY - cameraY);
-	let nanonautSpriteSheetRij = Math.floor(nanonautFrameNr/NANONAUT_NR_FRAMES_PER_RIJ);
-	let nannonautSpriteSheetKolom = nanonautFrameNr % NANONAUT_NR_FRAMES_PER_RIJ;
-	let nannonautSpriteSheetX = nannonautSpriteSheetKolom * NANONAUT_BREEDTE;
-	let nannonautSpriteSheetY = nanonautSpriteSheetRij * NANONAUT_HOOGTE;
-	ctx.drawImage(ninja_sprite, nannonautSpriteSheetX, nannonautSpriteSheetY, 
-		NANONAUT_BREEDTE, NANONAUT_HOOGTE, nanonautX - cameraX, nanonautY - cameraY, 
-		NANONAUT_BREEDTE, NANONAUT_HOOGTE);
-	console.log(nanonautSpriteSheetRij + " " + nannonautSpriteSheetKolom);
+	// let nanonautSpriteSheetRij = Math.floor(nanonautFrameNr/NANONAUT_NR_FRAMES_PER_RIJ);
+	// let nannonautSpriteSheetKolom = nanonautFrameNr % NANONAUT_NR_FRAMES_PER_RIJ;
+	// let nannonautSpriteSheetX = nannonautSpriteSheetKolom * NANONAUT_BREEDTE;
+	// let nannonautSpriteSheetY = nanonautSpriteSheetRij * NANONAUT_HOOGTE;
+	// ctx.drawImage(ninja_sprite, nannonautSpriteSheetX, nannonautSpriteSheetY, 
+	// 	NANONAUT_BREEDTE, NANONAUT_HOOGTE, nanonautX - cameraX, nanonautY - cameraY, 
+	// 	NANONAUT_BREEDTE, NANONAUT_HOOGTE);
+	// Teken een geanimeerde sprite
+    function tekenGeanimeerdeSprite(schermX, schermY, frameNR, spriteSheet) {
+    	let spriteSheetRij = Math.floor(frameNR/spriteSheet.nrFramesPerRij);
+    	let spriteSheetKolom = frameNR % spriteSheet.nrFramesPerRij;
+    	let spriteSheetX = spriteSheetKolom * spriteSheet.spriteWidth;
+    	let spriteSheetY = spriteSheetRij * spriteSheet.spriteHeight;
+    	ctx.drawImage(
+    		spriteSheet.image, 
+    		spriteSheetX, 
+    		spriteSheetY,
+    		spriteSheet.spriteWidth,
+    		spriteSheet.spriteHeight,
+    		schermX, schermY,
+    		spriteSheet.spriteWidth,
+    		spriteSheet.spriteHeight
+    	)
+    }
+    tekenGeanimeerdeSprite(nanonautX - cameraX, nanonautY - cameraY, nanonautFrameNr, nannonautSpriteSheet);
 }
 
-
+// Eventhandeler start game
+elementID("start_btn").addEventListener("click", function(event) {
+	event.preventDefault();
+	start();
+})
 
 
 // // Global variable, CONSTANTEN
