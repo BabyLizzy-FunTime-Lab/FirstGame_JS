@@ -31,7 +31,10 @@ let ROBOT_BREEDTE = 141;
 let ROBOT_HOOGTE = 139;
 let ROBOT_ANIMATIESNELHEID = 5;
 let ROBOT_NR_ANIMATIEFRAMES = 9;
-let ROBOT_X_SNELHEID = 2;
+let ROBOT_X_SNELHEID = 5;
+let MIN_AFSTAND_TUSSEN_ROBOTS = 400;
+let MAX_AFSTAND_TUSSEN_ROBOTS = 1200;
+let MAX_ACTIEVE_ROBOTS = 3;
 
 // INSTELLINGEN
 let canvas = document.createElement("canvas");
@@ -62,11 +65,21 @@ let robotSpriteSheet = {
 	spriteHeight: ROBOT_HOOGTE,
 	image: robot_bad_sprite
 }
-let robotData = [{
-	x: 800,
-	y: GROND_Y - ROBOT_HOOGTE,
-	frameNR: 0
-}];
+let robotData = [];
+
+// Hit box
+let nanonaut_Hitbox = {
+	x_Offset: 60,
+	y_Offset: 20,
+	breedte: 50,
+	hoogte: 200
+};
+let robot_Hitbox = {
+	x_Offset: 50,
+	y_Offset: 20,
+	breedte: 50,
+	hoogte: 100
+};
 
 // Create bosjes, with coordinates, to be drawn.
 function genereerBosjes() {
@@ -107,9 +120,54 @@ function tekenGeanimeerdeSprite(schermX, schermY, frameNR, spriteSheet) {
 	)
 }
 
+// Hit detection functions
+function overlappenNanonautEnRobotOpEenAs(nanonautDichtbijX, nanonautVerX, robotDichtbijX, robotVerX) {
+	let nanonautOverlaptRandRobotDichtbij = 
+		(nanonautVerX >= robotDichtbijX) && 
+		(nanonautVerX <= robotVerX);
+	let nanonautOverlaptRandRobotVer = 
+		(nanonautDichtbijX >= robotDichtbijX) && 
+		(nanonautDichtbijX <= robotVerX);
+	let nanonautOverlaptRobotHelemaal = 
+		(nanonautDichtbijX <= robotDichtbijX) && 
+		(nanonautVerX >= robotVerX);
+	return nanonautOverlaptRandRobotDichtbij || nanonautOverlaptRandRobotVer || nanonautOverlaptRobotHelemaal;
+}
+function overlappenNanonautRobot(nanonautX, nanonautY, nanonautBreedte, nanonautHoogte,
+	robotX, robotY, robotBreedte, robotHoogte) {
+	let nanonautOverlaptRobotOp_X_As = overlappenNanonautEnRobotOpEenAs(
+		nanonautX, 
+		nanonautX + nanonautBreedte,
+		robotX,
+		robotX + robotBreedte
+	);
+	let nanonautOverlaptRobotOp_Y_As = overlappenNanonautEnRobotOpEenAs(
+		nanonautY,
+		nanonautY + nanonautHoogte,
+		robotY,
+		robotY + robotHoogte
+	);
+	return nanonautOverlaptRobotOp_X_As && nanonautOverlaptRobotOp_Y_As;
+}
+
 // Verplaats en animeer robots
 function updateRobots() {
 	for (var i = 0; i < robotData.length; i++) {
+		// Check for hit
+		let hit_check = overlappenNanonautRobot(
+			nanonautX + nanonaut_Hitbox.x_Offset,
+			nanonautY + nanonaut_Hitbox.y_Offset,
+			nanonaut_Hitbox.breedte,
+			nanonaut_Hitbox.hoogte,
+			robotData[i].x + robot_Hitbox.x_Offset,
+			robotData[i].y + robot_Hitbox.y_Offset,
+			robot_Hitbox.breedte,
+			robot_Hitbox.hoogte
+		);
+		if (hit_check) {
+			console.log("Hit!!" + hit_check);
+		}
+		// Robots run left
 		robotData[i].x -= ROBOT_X_SNELHEID;
 		if ((spelFrameTeller % ROBOT_ANIMATIESNELHEID) === 0) {
 			robotData[i].frameNR++;
@@ -117,6 +175,31 @@ function updateRobots() {
 				robotData[i].frameNR = 0;
 			}
 		}
+		// Verwijder robots die uit beeld zijn, uit de robotData array.
+		let robotIndex = 0;
+		while (robotIndex < robotData.length) {
+			if (robotData[robotIndex].x < cameraX - ROBOT_BREEDTE) {
+				robotData.splice(robotIndex, 1);
+				console.log("Robot gone " + robotIndex);
+			} else {
+				robotIndex++;
+				// console.log("Robot in screen " + robotIndex);
+			}
+		}
+	}
+	// Generate new robot within the robotData array.
+	if (robotData.length < MAX_ACTIEVE_ROBOTS) {
+		let laatsteRobotX = CANVAS_BREEDTE;
+		if (robotData.length > 0) {
+			laatsteRobotX = robotData[robotData.length -1].x;
+		}
+		let nieuweRobotX = laatsteRobotX + MIN_AFSTAND_TUSSEN_ROBOTS + 
+			Math.random() * (MAX_AFSTAND_TUSSEN_ROBOTS - MIN_AFSTAND_TUSSEN_ROBOTS);
+		robotData.push({
+			x: nieuweRobotX,
+			y: GROND_Y - ROBOT_HOOGTE,
+			frameNR: 0
+		}); 
 	}
 }
 
